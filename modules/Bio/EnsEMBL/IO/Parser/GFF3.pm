@@ -27,7 +27,7 @@ sub open {
     my ($caller, $filename, @other_args) = @_;
     my $class = ref($caller) || $caller;
     
-    my $self = $class->SUPER::open($filename, '\t', @other_args);
+    my $self = $class->SUPER::open($filename, @other_args);
 
     # Metadata defaults
     if ($self->{'params'}->{'mustReadMetadata'}) {
@@ -71,104 +71,20 @@ sub read_metadata {
         # DZ: I do not have the foggiest idea what Type means
         $self->{'metadata'}->{'Type'} = \@tail;
     }
-};
-
-sub getRawSeqName {
-    my $self = shift;
-    return $self->{'record'}[0]
-}
-
-sub getSeqName {
-    my $self = shift;
-    return $self->getRawSeqName();
-}
-
-sub getRawSource {
-    my $self = shift;
-    return $self->{'record'}[1]
+    elsif ($line =~ /^#/ and $line !~ /^#\s*$/) {
+        chomp $line;
+        push(@{$self->{metadata}->{data}}, $line);
+    }
 }
 
 sub getSource {
     my $self = shift;
-    return $self->getRawSource();
+    return decode_entites($self->getRawSource());
 }
 
-sub getRawStart {
+sub getType {
     my $self = shift;
-    return $self->{'record'}[2]
-}
-
-sub getStart {
-    my $self = shift;
-    return $self->getRawStart();
-}
-
-sub getRawEnd {
-    my $self = shift;
-    return $self->{'record'}[3]
-}
-
-sub getEnd {
-    my $self = shift;
-    return $self->getRawEnd();
-}
-
-sub getRawScore {
-    my $self = shift;
-    return $self->{'record'}[4]
-}
-
-sub getScore {
-    my $self = shift;
-    my $val = $self->getRawScore();
-    if ($val =~ /\./) {
-            return undef;
-    } else {
-            return $val;
-    }
-}
-
-sub getRawStrand {
-    my $self = shift;
-    return $self->{'record'}[5]
-}
-
-my %strand_conversion = ( '+' => '1', '.' => '0', '-' => '-1');
-
-sub getStrand {
-    my $self = shift;
-    my $val = $self->getRawStrand();
-    if ($val =~ /\./) {
-            return undef;
-    } else {
-            return $strand_conversion{$val};
-    }
-}
-
-sub getRawFrame {
-    my $self = shift;
-    return $self->{'record'}[6]
-}
-
-sub getFrame {
-    my $self = shift;
-    my $val = $self->getRawFrame();
-    if ($val =~ /\./) {
-            return undef;
-    } else {
-            return $val;
-    }
-}
-
-sub getRawAttribute {
-    my $self = shift;
-    return $self->{'record'}[7]
-}
-
-sub getAttribute {
-    my $self = shift;
-    my $val = $self->getRawAttribute();
-
+    return decode_entites($self->getRawType());
 }
 
 # NOT FULLY IMPLEMENTED
